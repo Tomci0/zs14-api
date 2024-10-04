@@ -7,6 +7,8 @@ import AppError from '../utils/appError';
 import Class from '../models/class.model';
 import Codes from '../models/codes.model';
 
+import bcrypt from 'bcrypt';
+
 export default {
     index: (req: Request, res: Response) => {},
     me: (req: Request, res: Response) => {
@@ -65,10 +67,62 @@ export default {
                 status: 'success',
                 message: 'User created',
                 user: user,
+                token: token.code,
             });
         } catch (error) {
-            console.log(error);
             return next(new AppError('Error creating user', 500));
         }
+    },
+
+    registerUser: async (req: Request, res: Response, next: NextFunction) => {
+        const { code, email, password } = req.body;
+
+        if (!code || !email || !password) {
+            return next(new AppError('Missing required fields', 400));
+        }
+
+        // if (password.length < 8) {
+        //     return next(new AppError('Password too short', 400));
+        // }
+
+        const isCodeExist = await Codes.findOne({ code: code }).populate('user');
+
+        if (!isCodeExist) {
+            return next(new AppError('Wystąpił błąd. Spróbuj ponownie.', 400));
+        }
+
+        if (isCodeExist.isExpired()) {
+            return next(new AppError('Wystąpił błąd. Spróbuj ponownie.', 400));
+        }
+
+        const user = isCodeExist.user as IUser;
+
+        if (!user) {
+            return next(new AppError('Wystąpił błąd. Spróbuj ponownie.', 400));
+        }
+
+        const isEmailTaken = await User.findOne({ email: email });
+
+        if (isEmailTaken) {
+            return next(new AppError('Adres E-Mail jest juz w uzyciu.', 400));
+        }
+
+        user.email = email;
+        user.password = bcrypt.hashSync(password, 10);
+        user.disabled = false;
+
+        user.markModified('email');
+        user.markModified('password');
+        user.markModified('disabled');
+
+        await user.save();
+
+        await Codes.deleteOne({ code });
+
+        res.json({
+            status: 'success',
+            message: 'User registered',
+            user: user,
+        });
     },
 };

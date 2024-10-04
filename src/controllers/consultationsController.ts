@@ -11,14 +11,16 @@ import APIFeatures from '../utils/appFeatures';
 
 import { ETime } from '../types/enums';
 import { IConsultationModel } from '../models/consultation.model';
-import { IConsultation } from '../types/types';
+import { IConsultation, IScope } from '../types/types';
 import { ISubject } from '../models/subject.model';
-import { IUser } from '../models/user.model';
 import { IBuilding } from '../models/building.model';
 import { IRoom } from '../models/room.model';
 import { IScopeModel } from '../models/scope.model';
 
+import { IUser } from '../types/types';
 import Registration, { IRegistration } from '../models/registration.model';
+import { sign } from 'crypto';
+import path from 'path';
 
 export default {
     async index(req: Request, res: Response) {
@@ -84,6 +86,7 @@ export default {
 
     async get(req: Request, res: Response, next: NextFunction) {
         const { id, min_date, max_date, date, teacher, subject } = req.query;
+        const user = req.user as IUser;
 
         if (min_date) {
             const date = new Date(min_date.toString());
@@ -169,7 +172,15 @@ export default {
                             room: (consultation.room as IRoom).name as string,
                             color: consultation.color,
                             max_students: consultation.max_students,
-                            students: await findSignedUsers(consultation._id, true),
+                            students:
+                                user && (user.isAdmin || user.isTeacher)
+                                    ? await findSignedUsers(consultation._id, false)
+                                    : await findSignedUsers(consultation._id, true),
+                            isSigned:
+                                user &&
+                                !user.isAdmin &&
+                                !user.isTeacher &&
+                                (await isSigned(consultation._id, user._id as ObjectId)),
                             end_signing_up: consultation.end_signing_up,
                             description: consultation.description,
                             scopes: consultation.scopes,
@@ -186,14 +197,179 @@ export default {
             return next(new AppError('Error with finding consultations', 500));
         }
     },
+
+    async sign(req: Request, res: Response, next: NextFunction) {
+        const { consultationId, reason, scope } = req.body;
+
+        if (!consultationId) {
+            return next(new AppError('Missing required fields', 400));
+        }
+
+        if (!isValidObjectId(consultationId)) {
+            return next(new AppError('Invalid consultation id', 400));
+        }
+
+        if (reason !== 'other' && !isValidObjectId(scope)) {
+            return next(new AppError('Invalid scope id', 400));
+        }
+
+        const consultation_data: IConsultationModel | null = await Consultation.findById(consultationId);
+
+        if (!consultation_data) {
+            return next(new AppError('Nie znaleziono takiej konsultacji.', 404));
+        }
+
+        const user = req.user as IUser;
+
+        if (!user) {
+            return next(new AppError('Nie jesteś zalogowany.', 404));
+        }
+
+        // if (consultation_data.students?.includes(user?._id)) {
+        //     return next(new AppError('Jesteś juz zapisany.', 400));
+        // }
+
+        if (consultation_data.students?.length === consultation_data.max_students) {
+            return next(new AppError('Brak miejsc.', 400));
+        }
+
+        try {
+            const registration = new Registration({
+                user: user._id,
+                consultation: consultationId,
+                date: new Date(),
+                reason,
+                scope,
+            });
+
+            await registration.save();
+
+            return res.json(new AppResponse(200, 'Zapisano na konsultacje.', registration));
+        } catch (err) {
+            console.error(err);
+            return next(new AppError('Error with signing up', 500));
+        }
+    },
+
+    async unsign(req: Request, res: Response, next: NextFunction) {
+        const { consultationId } = req.body;
+
+        if (!consultationId) {
+            return next(new AppError('Missing required fields', 400));
+        }
+
+        if (!isValidObjectId(consultationId)) {
+            return next(new AppError('Invalid consultation id', 400));
+        }
+
+        const consultation_data: IConsultationModel | null = await Consultation.findById(consultationId);
+
+        if (!consultation_data) {
+            return next(new AppError('Nie znaleziono takiej konsultacji.', 404));
+        }
+
+        const user = req.user as IUser;
+
+        if (!user) {
+            return next(new AppError('Nie jesteś zalogowany.', 404));
+        }
+
+        try {
+            const registration = await Registration.findOneAndDelete({ user: user._id, consultation: consultationId });
+
+            if (!registration) {
+                return next(new AppError('Nie jesteś zapisany na tę konsultację.', 404));
+            }
+
+            return res.json(new AppResponse(200, 'Wypisano z konsultacji.', registration));
+        } catch (err) {
+            console.error(err);
+            return next(new AppError('Error with unsigning up', 500));
+        }
+    },
+
+    async signed(req: Request, res: Response, next: NextFunction) {
+        const user = req.user as IUser;
+        try {
+            const signedConsultations = await Registration.find({ user: user._id })
+                .populate({
+                    path: 'consultation', // Populacja dla 'scopes'
+                    populate: [
+                        {
+                            path: 'subject',
+                        },
+                        {
+                            path: 'teacher',
+                        },
+                        {
+                            path: 'building',
+                        },
+                        {
+                            path: 'room',
+                        },
+                    ],
+                })
+                .populate('scope');
+
+            let response = await Promise.all(
+                signedConsultations.map(async (registration) => {
+                    const consultation = registration.consultation as IConsultationModel;
+                    const students = await findSignedUsers(consultation._id, true);
+
+                    return {
+                        consultation: {
+                            _id: consultation._id,
+                            date: consultation.date,
+                            subject: (consultation.subject as ISubject).name,
+                            teacher: {
+                                _id: (consultation.teacher as IUser)._id,
+                                name: (consultation.teacher as IUser).name,
+                                image: (consultation.teacher as IUser).image,
+                            },
+                            building: (consultation.building as IBuilding).name,
+                            room: (consultation.room as IRoom).name,
+                            max_students: consultation.max_students,
+                            students,
+                            end_signing_up: consultation.end_signing_up,
+                            description: consultation.description,
+                            time: consultation.time,
+                        },
+                        date: registration.date,
+                        reason: registration.reason,
+                        scope: {
+                            name: (registration.scope as IScope).name,
+                            description: (registration.scope as IScope).description,
+                        },
+                    };
+                })
+            );
+
+            res.json(new AppResponse(200, 'Signed consultations', response));
+        } catch (e) {
+            console.error(e);
+            return next(new AppError('Error with finding signed consultations', 500));
+        }
+    },
 };
+
+async function isSigned(consultationId: ObjectId, userId: ObjectId) {
+    const registration = await Registration.findOne({ consultation: consultationId, user: userId });
+
+    if (registration) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
 async function findSignedUsers(id: ObjectId, count: boolean) {
     const signedUsers = Registration.find({ consultation: id }).populate('user');
 
     if (count) {
-        return signedUsers.countDocuments();
+        return (await signedUsers).length;
     }
 
-    return await signedUsers;
+    return (await signedUsers).map((sign) => {
+        return sign.user;
+    });
 }

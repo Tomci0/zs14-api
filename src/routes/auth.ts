@@ -11,7 +11,11 @@ router.get(
     passport.authenticate('google', { failureRedirect: '/login' }),
     authController.google_callback
 );
-router.get('/logout', authController.logout);
+router.post('/login', authController.login);
+
+router.post('/logout', authController.logout);
+
+router.get('/verifyCode/:code', authController.verifyCode);
 
 router.get('/activate', authController.activate);
 

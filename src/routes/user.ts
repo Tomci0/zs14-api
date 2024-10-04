@@ -1,7 +1,7 @@
 import Express from 'express';
 const router = Express.Router();
 
-import jwtAuth from '../middlewares/auth';
+import isLogged from '../middlewares/auth';
 
 import UserController from '../controllers/userController';
 
@@ -9,8 +9,9 @@ import UserController from '../controllers/userController';
 
 router.get('/', UserController.index);
 router.post('/create', UserController.create);
+router.post('/registerUser', UserController.registerUser);
 
-router.use(jwtAuth);
+router.use(isLogged);
 
 // PROTECTED ROUTES
 

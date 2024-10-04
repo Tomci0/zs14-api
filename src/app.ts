@@ -20,7 +20,7 @@ import authRoutes from './routes/auth';
 import consultationRoutes from './routes/consultations';
 import devRoutes from './routes/dev';
 
-import { useGoogleStrategy } from './configs/passport.config';
+import { useGoogleStrategy, useLocalStrategy } from './configs/passport.config';
 
 const app = express();
 
@@ -86,6 +86,7 @@ app.use(mongoSanitize());
 app.use(hpp());
 
 useGoogleStrategy();
+useLocalStrategy();
 
 // Routes
 app.use('/', indexRoutes);

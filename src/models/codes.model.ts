@@ -1,6 +1,10 @@
 import { Schema, model, ObjectId, Document, Model } from 'mongoose';
 import User from './user.model';
 
+import { IUser } from '../types/types';
+
+import QRCode from 'qrcode';
+
 // Interfejs dla metod instancji
 interface ICodesMethods {
     isExpired(): boolean;
@@ -9,7 +13,7 @@ interface ICodesMethods {
 
 // Interfejs dla głównych pól dokumentu
 interface ICodes extends Document {
-    user: ObjectId;
+    user: ObjectId | IUser;
     code: number;
     date: Date;
     type: string;
@@ -62,7 +66,7 @@ codesSchema.statics.createCode = function (user: ObjectId, type: string, author?
     return this.create({ user, code, date, type, author, expire_at });
 };
 
-codesSchema.statics.getCode = function (code: string): Promise<ICodes | null> {
+codesSchema.statics.findCode = function (code: string): Promise<ICodes | null> {
     return this.findOne({ code });
 };
 

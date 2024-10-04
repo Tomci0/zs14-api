@@ -1,10 +1,15 @@
 import passport from 'passport';
 import passportGoogle from 'passport-google-oauth20';
+import { Strategy as LocalStrategy } from 'passport-local';
+
+import bcrypt from 'bcrypt';
 
 import getUserById from '../services/getUser';
 import insertUser from '../services/insertUser';
 import { IUser } from '../types/types';
 import AppError from '../utils/appError';
+
+import User from '../models/user.model';
 
 const GoogleStrategy = passportGoogle.Strategy;
 
@@ -66,11 +71,59 @@ export function useGoogleStrategy() {
         )
     );
 
-    https: passport.serializeUser(function (user: Express.User, done) {
+    passport.serializeUser(function (user: Express.User, done) {
         done(null, user);
     });
 
     passport.deserializeUser(function (user: Express.User, done) {
         done(null, user);
     });
+}
+
+export function useLocalStrategy() {
+    passport.use(
+        new LocalStrategy(async function (username, password, done) {
+            try {
+                if (username == '' || password == '') {
+                    return done(new AppError('Niepoprawny adres e-mail lub hasło.', 200));
+                }
+
+                const userData: IUser | null = await User.findOne({ email: username });
+
+                if (!userData) {
+                    return done(new AppError('Niepoprawny adres e-mail lub hasło.', 200));
+                }
+
+                if (!userData.password) {
+                    return done(new AppError('Niepoprawny adres e-mail lub hasło.', 200));
+                }
+
+                if (userData.disabled) {
+                    return done(new AppError('Niepoprawny adres e-mail lub hasło.', 200));
+                }
+
+                const isPasswordCorrect = await bcrypt.compare(password, userData.password);
+                if (!isPasswordCorrect) {
+                    return done(new AppError('Niepoprawny adres e-mail lub hasło.', 200));
+                }
+
+                const user = {
+                    _id: userData._id,
+                    googleId: userData.googleId,
+                    email: userData.email,
+                    name: userData.name,
+                    image: userData.image,
+                    isTeacher: userData.isTeacher,
+                    isAdmin: userData.isAdmin,
+                    disabled: userData.disabled,
+                    isLogged: true,
+                } as IUser;
+
+                return done(null, user);
+            } catch (err) {
+                console.error(err);
+                return done(new AppError('Error with finding user', 500));
+            }
+        })
+    );
 }

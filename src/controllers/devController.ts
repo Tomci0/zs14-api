@@ -4,7 +4,7 @@ import QRCode from 'qrcode';
 
 // import { Types } from 'mongoose';
 
-// import Consultation from '../models/consultation.model';
+import Consultation from '../models/consultation.model';
 // import Building from '../models/building.model';
 // import Class from '../models/class.model';
 // import Room from '../models/room.model';
@@ -21,9 +21,16 @@ export default {
     },
     setup: async (req: Request, res: Response) => {
         try {
+            const update = await Consultation.find();
+
+            update.forEach((consultation) => {
+                consultation['end_signing_up'] = new Date('10-10-2024');
+                consultation.markModified('end_signing_up');
+                consultation.save();
+            });
+
             res.json('Consultations dev setup');
         } catch (error) {
-            console.log(error);
             res.status(500).json(error);
         }
     },
