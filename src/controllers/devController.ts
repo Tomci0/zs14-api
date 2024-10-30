@@ -5,6 +5,7 @@ import QRCode from 'qrcode';
 // import { Types } from 'mongoose';
 
 import Consultation from '../models/consultation.model';
+import AppResponse from '../utils/appResponse';
 // import Building from '../models/building.model';
 // import Class from '../models/class.model';
 // import Room from '../models/room.model';
@@ -29,7 +30,7 @@ export default {
                 consultation.save();
             });
 
-            res.json('Consultations dev setup');
+            res.json(new AppResponse(200, 'Consultations updated'));
         } catch (error) {
             res.status(500).json(error);
         }

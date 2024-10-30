@@ -8,41 +8,37 @@ import Class from '../models/class.model';
 import Codes from '../models/codes.model';
 
 import bcrypt from 'bcrypt';
+import AppResponse from '../utils/appResponse';
 
 export default {
     index: (req: Request, res: Response) => {},
     me: (req: Request, res: Response) => {
-        res.json({
-            status: 'success',
-            message: 'Welcome to the profile page',
-            isLogged: true,
-            user: req.user,
-        });
+        res.json(new AppResponse(200, 'User data', req.user));
     },
     create: async (req: Request, res: Response, next: NextFunction) => {
         const { name, email, userClass, isAdmin, isTeacher } = req.body;
 
         if (!name || !email || !userClass) {
-            return next(new AppError('Missing required fields', 400));
+            return res.json(new AppError('Missing required fields', 400));
         }
 
         if (!isValidObjectId(userClass)) {
-            return next(new AppError('Invalid class id', 400));
+            return res.json(new AppError('Invalid class id', 400));
         }
 
         const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!validEmail.test(email)) {
-            return next(new AppError('Invalid email', 400));
+            return res.json(new AppError('Invalid email', 400));
         }
 
         const isEmailTaken = await User.findOne({ email: email });
         if (isEmailTaken) {
-            return next(new AppError('Email already taken', 400));
+            return res.json(new AppError('Email already taken', 400));
         }
 
         const isClassExists = await Class.findOne({ _id: userClass });
         if (!isClassExists) {
-            return next(new AppError('Class does not exist', 400));
+            return res.json(new AppError('Class does not exist', 400));
         }
 
         try {
@@ -57,18 +53,15 @@ export default {
 
             await user.save();
 
-            // Create new token for user to activate account
-
-            // Codes.createCode(user._id, 'activate');
-
             const token = await Codes.createCode(user._id as ObjectId, 'activate');
 
-            res.json({
-                status: 'success',
-                message: 'User created',
-                user: user,
-                token: token.code,
-            });
+            // res.json({
+            //     status: 'success',
+            //     message: 'User created',
+            //     user: user,
+            //     token: token.code,
+            // });
+            res.json(new AppResponse(200, 'User created', { user, token: token.code }));
         } catch (error) {
             return next(new AppError('Error creating user', 500));
         }
@@ -119,10 +112,11 @@ export default {
 
         await Codes.deleteOne({ code });
 
-        res.json({
-            status: 'success',
-            message: 'User registered',
-            user: user,
-        });
+        // res.json({
+        //     status: 'success',
+        //     message: 'User registered',
+        //     user: user,
+        // });
+        res.json(new AppResponse(200, 'User registered', user));
     },
 };

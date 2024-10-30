@@ -1,10 +1,11 @@
-export default class AppError extends Error {
+import AppResponse from './appResponse';
+
+export default class AppError extends AppResponse {
     public statusCode: number;
-    public status: string;
-    public error: boolean = true;
+
     constructor(message: string, statusCode: number) {
-        super(message);
+        super(statusCode, message);
+        this.success = false;
         this.statusCode = statusCode;
-        this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
     }
 }
