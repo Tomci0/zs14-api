@@ -20,11 +20,11 @@ export default {
 
     google: passport.authenticate('google', { scope: ['profile', 'email'] }),
 
-    google_callback: (req: Request, res: Response, next: NextFunction) => {
-        const token = jwt.sign({ user: req.user }, process.env.JWT_SECRET || '', { expiresIn: '30d' });
-        res.cookie('jwtToken', token, { httpOnly: true, secure: false });
-        res.redirect('http://localhost:3000');
-    },
+    // google_callback: (req: Request, res: Response, next: NextFunction) => {
+    //     const token = jwt.sign({ user: req.user }, process.env.JWT_SECRET || '', { expiresIn: '30d' });
+    //     res.cookie('jwtToken', token, { httpOnly: true, secure: false });
+    //     res.redirect('http://localhost:3000');
+    // },
 
     login: (req: Request, res: Response, next: NextFunction) => {
         passport.authenticate('local', (err: Error, user: IUser, options: any) => {

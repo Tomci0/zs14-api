@@ -85,7 +85,7 @@ app.use(mongoSanitize());
 // Prevent parameter pollution
 app.use(hpp());
 
-useGoogleStrategy();
+// useGoogleStrategy();
 useLocalStrategy();
 
 // Routes
