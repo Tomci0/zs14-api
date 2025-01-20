@@ -76,4 +76,21 @@ export interface IScopeType {
     practise: boolean;
 }
 
-export default { IUser, ISubject, IConsultation, IBuilding, IClass, IRegistration, IRoom, IScope, IScopeType };
+export interface ISong {
+    _id: ObjectId;
+    songId: string;
+
+    title: string;
+    artist: string;
+    cover: string;
+
+    length: number;
+    album: string;
+    year_released: number;
+    genre: string;
+
+    lastPlayed: Date;
+    addedBy: ObjectId;
+}
+
+export default { IUser, ISubject, IConsultation, IBuilding, IClass, IRegistration, IRoom, IScope, IScopeType, ISong };

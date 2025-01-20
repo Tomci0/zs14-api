@@ -19,6 +19,7 @@ import indexRoutes from './routes/index';
 import authRoutes from './routes/auth';
 import consultationRoutes from './routes/consultations';
 import devRoutes from './routes/dev';
+import radioRoutes from './routes/radio';
 
 import { useGoogleStrategy, useLocalStrategy } from './configs/passport.config';
 
@@ -94,6 +95,7 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/consultations', consultationRoutes);
 app.use('/api/v1/dev', devRoutes);
+app.use('/api/v1/radio', radioRoutes);
 
 // handle undefined Routes
 app.use('*', (req: Request, res: Response, next: NextFunction) => {
