@@ -55,10 +55,19 @@ app.use(morgan('tiny'));
 // Allow Cross-Origin requests
 app.use(
     cors({
-        origin: ['http://localhost:3000', 'http://localhost:3001'],
+        origin: [
+            'http://localhost:3000',
+            'http://localhost:3001',
+            'https://konsultacje.zs14.tech',
+            'https://admin.zs14.tech',
+        ],
         credentials: true,
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
     })
 );
+
+app.options('*', cors());
 
 // Set security HTTP headers
 app.use(helmet());
