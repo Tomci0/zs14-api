@@ -35,4 +35,3 @@ jobs:
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             nvm use --lts
             ./update.sh
-            pm2 restart api
