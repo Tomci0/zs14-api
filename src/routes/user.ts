@@ -12,7 +12,7 @@ router.get('/', UserController.index);
 router.post('/create', UserController.create);
 router.post('/registerUser', UserController.registerUser);
 
-router.use(isLogged);
+// router.use(isLogged);
 
 // PROTECTED ROUTES
 
