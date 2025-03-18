@@ -29,8 +29,8 @@ jobs:
           port: 22
           script: |
             whoami
-            echo "Last sync: $(date)" > log.txt
             cd apps/zs14-api
+            echo "Last sync: $(date)" > last_update.txt
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             nvm use --lts
