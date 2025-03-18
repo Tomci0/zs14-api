@@ -8,11 +8,11 @@ import consultationsController from '../controllers/consultationsController';
 
 router.get('/', consultationsController.index);
 
-router.use(getUser);
+// router.use(getUser);
 
 router.get('/get', consultationsController.get);
 
-router.use(isLogged);
+// router.use(isLogged);
 
 router.post('/sign', consultationsController.sign);
 router.post('/unsign', consultationsController.unsign);
