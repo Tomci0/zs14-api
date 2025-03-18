@@ -51,16 +51,15 @@ export default {
                 disabled: true,
             });
 
+            console.log('2137-0');
+
             await user.save();
 
-            const token = await Codes.createCode(user._id as ObjectId, 'activate');
+            console.log('2137-1');
 
-            // res.json({
-            //     status: 'success',
-            //     message: 'User created',
-            //     user: user,
-            //     token: token.code,
-            // });
+            const token = await Codes.createCode(user._id as ObjectId, 'activate');
+            console.log('2137');
+            console.log(token);
             res.json(new AppResponse(200, 'User created', { user, token: token.code }));
         } catch (error) {
             return next(new AppError('Error creating user', 500));

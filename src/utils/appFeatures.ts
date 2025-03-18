@@ -8,7 +8,7 @@ interface QueryString {
 }
 
 class APIFeatures<T extends Document> {
-    public query: Query<T[], T>; // Ogólne typowanie dla zapytania Mongoose
+    public query: Query<any, T>; // Ogólne typowanie dla zapytania Mongoose
     public queryString: QueryString; // Parametry zapytania URL
 
     constructor(query: Query<T[], T>, queryString: QueryString) {

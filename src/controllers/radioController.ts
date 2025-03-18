@@ -110,7 +110,7 @@ export default {
     getVerifications: async (req: Request, res: Response) => {
         const songsQuery = Verification.find().populate('addedBy').populate('song');
         const features = new APIFeatures(songsQuery, req.query).limitFields().sort().paginate();
-        const songs = (await features.query).map((song) => {
+        const songs = (await features.query).map((song: any) => {
             const userData: IUser = song.addedBy as IUser;
 
             return {

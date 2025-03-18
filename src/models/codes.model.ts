@@ -47,23 +47,23 @@ codesSchema.methods.isAuthor = function (author: ObjectId): boolean {
 };
 
 // Metody statyczne
-codesSchema.statics.createCode = function (user: ObjectId, type: string, author?: ObjectId): Promise<ICodes> {
+codesSchema.statics.createCode = async function (user: ObjectId, type: string, author?: ObjectId): Promise<ICodes> {
     // const code = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    let code = Math.floor(Math.random() * 1000000)
-        .toString()
-        .padStart(6, '0');
 
     const date = new Date();
     const expire_at = new Date();
     expire_at.setDate(expire_at.getDate() + 2);
 
+    let code;
+    let existingCode;
+
     do {
         code = Math.floor(Math.random() * 1000000)
             .toString()
             .padStart(6, '0');
-    } while (this.findOne({ code }));
-
-    return this.create({ user, code, date, type, author, expire_at });
+        existingCode = await this.findOne({ code });
+    } while (existingCode);
+    return await this.create({ user, code, date, type, author, expire_at });
 };
 
 codesSchema.statics.findCode = function (code: string): Promise<ICodes | null> {
