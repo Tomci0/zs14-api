@@ -1,0 +1,41 @@
+on: 
+  push:
+    branches: [master]
+      
+name: 🚀 Deploy app on push
+jobs:
+  web-deploy:
+    name: 🎉 Deploy
+    runs-on: ubuntu-latest
+    steps:
+    - name: 🚚 Get latest code
+      uses: actions/checkout@v2
+      
+    - name: 📂 Sync files
+      uses: SamKirkland/FTP-Deploy-Action@4.1.0
+      with:
+        server: ${{ secrets.FTP_HOST }}
+        username: ${{ secrets.FTP_LOGIN }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./
+        server-dir: apps/zs14-api/
+
+    - name: 💻 Execute Node instance restart
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.FTP_HOST }}
+        username: ${{ secrets.FTP_LOGIN }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        port: 22
+        script: |
+          whoami
+          echo Last sync: `date` > log.txt
+          cd apps/zs14-api
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          nvm use --lts
+          node -v
+          npm -v
+          npm install
+          npm run build
+          pm2 restart api
