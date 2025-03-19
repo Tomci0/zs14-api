@@ -55,7 +55,12 @@ app.use(morgan('tiny'));
 // Allow Cross-Origin requests
 app.use(
     cors({
-        origin: true, // Akceptuj wszystkie pochodzenia
+        origin: [
+            'https://konsultacje.zs14.tech',
+            'https://konsultacje.zs14.tech:3000',
+            'https://admin.zs14.tech',
+            'https://admin.zs14.tech:3001',
+        ], // Akceptuj wszystkie pochodzenia
         credentials: true,
         allowedHeaders: [
             'Content-Type',
