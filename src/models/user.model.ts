@@ -1,13 +1,13 @@
 import { Schema, model, connect, Document, ObjectId } from 'mongoose';
 
-import Class from './class.model';
+import Class, { IClass } from './class.model';
 
 interface IUser extends Document {
     googleId?: string;
     email?: string;
     name: string;
     password?: string;
-    class?: ObjectId;
+    class?: ObjectId | IClass | string;
     image: string;
     isTeacher: boolean;
     isAdmin: boolean;

@@ -4,7 +4,7 @@ import User, { IUser } from '../models/user.model';
 import { isValidObjectId, ObjectId } from 'mongoose';
 
 import AppError from '../utils/appError';
-import Class from '../models/class.model';
+import Class, { IClass } from '../models/class.model';
 import Codes from '../models/codes.model';
 
 import bcrypt from 'bcrypt';
@@ -128,16 +128,18 @@ export default {
     },
 
     usersAll: async (req: Request, res: Response) => {
-        const { page, max, search, sort, order } = req.query;
+        const users = User.find().populate('class').lean();
+        const features = new APIFeatures(users, req.query).limitFields().sort().paginate().limitFields().lean();
 
-        const features = new APIFeatures(User.find().populate('class'), req.query)
-            .limitFields()
-            .sort()
-            .paginate()
-            .lean();
+        const results = (await features.query).map((user: IUser) => {
+            if (!user.class) {
+                return user;
+            }
+            const classData = user.class as IClass;
+            user.class = classData.number + classData.symbol;
+            return user;
+        });
 
-        const users = await User.find().populate('class');
-
-        res.json(new AppResponse(200, 'Users', users));
+        res.json(new AppResponse(200, 'Users', results));
     },
 };

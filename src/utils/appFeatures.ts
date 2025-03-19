@@ -31,6 +31,8 @@ class APIFeatures<T extends Document> {
         const limit = this.queryString.limit ? parseInt(this.queryString.limit, 10) : 10;
         const skip = (page - 1) * limit;
 
+        console.log(page, limit, skip);
+
         this.query = this.query.skip(skip).limit(limit);
         return this;
     }
