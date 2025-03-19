@@ -55,13 +55,24 @@ app.use(morgan('tiny'));
 // Allow Cross-Origin requests
 app.use(
     cors({
-        origin: [
-            'https://konsultacje.zs14.tech',
-            'https://radio.zs14.tech',
-            'https://admin.zs14.tech',
-            'http://localhost:3000',
-            'http://localhost:3001',
-        ],
+        origin: function (origin, callback) {
+            const allowedOrigins = [
+                'https://konsultacje.zs14.tech',
+                'https://admin.zs14.tech',
+                'https://radio.zs14.tech',
+                'http://localhost:3000',
+                'http://localhost:3001',
+            ];
+
+            // Akceptuj też żądania bez origin (np. z Postmana)
+            if (!origin || allowedOrigins.includes(origin)) {
+                console.log('Origin:', origin);
+                callback(null, origin); // Zwróć konkretny origin, a nie true
+            } else {
+                console.log('Origin:', 'Niedozwolone przez CORS');
+                callback(new Error('Niedozwolone przez CORS'));
+            }
+        },
         credentials: true,
         allowedHeaders: [
             'Content-Type',
