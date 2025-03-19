@@ -62,7 +62,7 @@ app.use(
             'https://admin.zs14.tech',
         ],
         credentials: true,
-        allowedHeaders: ['Content-Type', 'Authorization'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'Access-Control-Allow-Origin'],
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
     })
 );
