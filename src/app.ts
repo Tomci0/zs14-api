@@ -85,8 +85,6 @@ app.use(
     })
 );
 
-app.options('*', cors());
-
 // Set security HTTP headers
 app.use(helmet());
 
