@@ -57,7 +57,12 @@ app.use(
     cors({
         origin: true, // Akceptuj wszystkie pochodzenia
         credentials: true,
-        allowedHeaders: ['Content-Type', 'Authorization', 'Access-Control-Allow-Origin'],
+        allowedHeaders: [
+            'Content-Type',
+            'Authorization',
+            'Access-Control-Allow-Origin',
+            'Access-Control-Allow-Methods',
+        ],
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     })
 );
