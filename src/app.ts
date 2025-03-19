@@ -60,6 +60,7 @@ app.use(
             'http://localhost:3001',
             'https://konsultacje.zs14.tech',
             'https://admin.zs14.tech',
+            'https://api.zs14.tech', // Dodaj tę linię
         ],
         credentials: true,
         allowedHeaders: ['Content-Type', 'Authorization', 'Access-Control-Allow-Origin'],
