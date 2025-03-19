@@ -34,7 +34,12 @@ export default {
 
             if (user) {
                 const token = jwt.sign({ user }, process.env.JWT_SECRET || '', { expiresIn: '30d' });
-                res.cookie('jwtToken', token, { httpOnly: true, secure: false });
+                res.cookie('jwtToken', token, {
+                    httpOnly: true,
+                    secure: process.env.VERSION === 'PROD',
+                    domain: process.env.DOMAIN,
+                    sameSite: 'lax',
+                });
                 return res.json(new AppResponse(401, 'Successfully logged in', user));
             }
         })(req, res);

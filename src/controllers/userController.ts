@@ -9,9 +9,12 @@ import Codes from '../models/codes.model';
 
 import bcrypt from 'bcrypt';
 import AppResponse from '../utils/appResponse';
+import APIFeatures from '../utils/appFeatures';
 
 export default {
-    index: (req: Request, res: Response) => {},
+    index: (req: Request, res: Response) => {
+        res.json(new AppResponse(200, 'User controller'));
+    },
     me: (req: Request, res: Response) => {
         res.json(new AppResponse(200, 'User data', req.user));
     },
@@ -117,5 +120,24 @@ export default {
         //     user: user,
         // });
         res.json(new AppResponse(200, 'User registered', user));
+    },
+
+    usersCount: async (req: Request, res: Response) => {
+        const usersCount = await User.countDocuments();
+        res.json(new AppResponse(200, 'Users count', usersCount));
+    },
+
+    usersAll: async (req: Request, res: Response) => {
+        const { page, max, search, sort, order } = req.query;
+
+        const features = new APIFeatures(User.find().populate('class'), req.query)
+            .limitFields()
+            .sort()
+            .paginate()
+            .lean();
+
+        const users = await User.find().populate('class');
+
+        res.json(new AppResponse(200, 'Users', users));
     },
 };

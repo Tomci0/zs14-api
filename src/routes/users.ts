@@ -16,6 +16,8 @@ router.post('/registerUser', UserController.registerUser);
 
 // PROTECTED ROUTES
 
+router.get('/all', isLogged, UserController.usersAll);
+router.get('/count', UserController.usersCount);
 router.get('/me', getUser, UserController.me);
 
 export default router;

@@ -14,7 +14,7 @@ import cookieParser from 'cookie-parser';
 import AppError from './utils/appError';
 
 import globalErrHandler from './controllers/errorController';
-import userRoutes from './routes/user';
+import usersRoutes from './routes/users';
 import indexRoutes from './routes/index';
 import authRoutes from './routes/auth';
 import consultationRoutes from './routes/consultations';
@@ -101,7 +101,7 @@ useLocalStrategy();
 
 // Routes
 app.use('/', indexRoutes);
-app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/users', usersRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/consultations', consultationRoutes);
 app.use('/api/v1/dev', devRoutes);
