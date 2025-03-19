@@ -57,10 +57,11 @@ app.use(
     cors({
         origin: [
             'https://konsultacje.zs14.tech',
+            'https://radio.zs14.tech',
             'https://admin.zs14.tech',
             'http://localhost:3000',
             'http://localhost:3001',
-        ], // Akceptuj wszystkie pochodzenia
+        ],
         credentials: true,
         allowedHeaders: [
             'Content-Type',
