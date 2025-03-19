@@ -60,9 +60,10 @@ app.use(
         allowedHeaders: [
             'Content-Type',
             'Authorization',
-            'Access-Control-Allow-Origin',
             'Access-Control-Allow-Methods',
+            'Access-Control-Request-Headers',
         ],
+        preflightContinue: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     })
 );
